@@ -14,15 +14,30 @@ COOKIE_NAME = "session"
 
 def get_firefox_session() -> str:
     """Steal a session cookie from the firefox sqlite database."""
-    cookie_file = find_firefox_cookie_db_path()
-    session = get_session_cookie_from_db(cookie_file)
-    return session
+    cookie_files = find_firefox_cookie_db_paths()
+    for cookie_file in cookie_files:
+        try:
+            print(cookie_file)
+            session = get_session_cookie_from_db(cookie_file)
+            return session
+        except Exception:
+            pass
+    raise Exception("Failed to find session cookie")
 
 
-def find_firefox_cookie_db_path() -> Path:
+def find_firefox_cookie_db_paths() -> list[Path]:
     """Find the path to the firefox cookie database."""
-    app_data_path = Path(os.environ["APPDATA"])
-    firefox_profiles = app_data_path / "Mozilla" / "Firefox" / "Profiles"
+    if os.name == "nt":
+        app_data_path = Path(os.environ["APPDATA"])
+        firefox_profiles = app_data_path / "Mozilla" / "Firefox" / "Profiles"
+    else:
+        firefox_profiles = (
+            Path(os.environ["HOME"])
+            / "Library"
+            / "Application Support"
+            / "Firefox"
+            / "Profiles"
+        )
 
     cookie_candidates = [
         subfolder / "cookies.sqlite"
@@ -31,12 +46,12 @@ def find_firefox_cookie_db_path() -> Path:
     ]
 
     match cookie_candidates:
-        case [path]:
-            return path
         case []:
             raise Exception("Failed to find Firefox profile")
         case _:
-            raise Exception("Found multiple Firefox profiles")
+            return sorted(
+                cookie_candidates, key=lambda p: p.stat().st_mtime, reverse=True
+            )
 
 
 def get_session_cookie_from_db(sqlite_file: Path) -> str:
