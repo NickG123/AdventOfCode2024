@@ -1,4 +1,5 @@
 """Helper functions for parsing input."""
+from itertools import takewhile
 from typing import Iterator, TextIO
 
 
@@ -16,3 +17,15 @@ def read_number_list(file: TextIO) -> list[tuple[int, ...]]:
 def read_number_columns(file: TextIO) -> list[tuple[int, ...]]:
     """Read a list of columns from a file."""
     return list(zip(*read_number_list(file)))
+
+
+def read_sections(file: TextIO) -> list[list[str]]:
+    """Read sections from a file."""
+    lines = read_lines(file)
+    results = []
+    while True:
+        section = list(takewhile(lambda s: s, lines))
+        if not section:
+            break
+        results.append(section)
+    return results
