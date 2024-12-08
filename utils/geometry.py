@@ -13,6 +13,9 @@ class Point2D:
     def __add__(self, other: Point2D) -> Point2D:
         return Point2D(self.x + other.x, self.y + other.y)
 
+    def __sub__(self, other: Point2D) -> Point2D:
+        return Point2D(self.x - other.x, self.y - other.y)
+
 
 UP = Point2D(0, -1)
 DOWN = Point2D(0, 1)
