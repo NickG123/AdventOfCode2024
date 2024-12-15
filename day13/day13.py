@@ -4,7 +4,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Iterator, TextIO
 
-from utils.parse import read_sections
+from utils.parse import read_sections, regex_groups
 
 # Math time...
 # We have: a * (dx1, dy1) + b (dx2, dy2) = (x, y) where only a and b are unknown.
@@ -69,21 +69,14 @@ def solve(cm: ClawMachine) -> tuple[int, int] | None:
     return a, b
 
 
-def get_match(regex: re.Pattern[str], line: str) -> tuple[str, ...]:
-    match = regex.match(line)
-    if match is None:
-        raise ValueError(f"Regex {regex} did not match line {line}")
-    return match.groups()
-
-
 def run(file: TextIO) -> Iterator[Any]:
     """Solution for Day 13."""
     total_cost = 0
     total_cost_p2 = 0
     for button_a, button_b, prize in read_sections(file):
-        _, dx1, dy1 = get_match(BUTTON_REGEX, button_a)
-        _, dx2, dy2 = get_match(BUTTON_REGEX, button_b)
-        x, y = get_match(PRIZE_REGEX, prize)
+        _, dx1, dy1 = regex_groups(BUTTON_REGEX, button_a)
+        _, dx2, dy2 = regex_groups(BUTTON_REGEX, button_b)
+        x, y = regex_groupsups(PRIZE_REGEX, prize)
         claw_machine = ClawMachine(
             int(dx1), int(dy1), int(dx2), int(dy2), int(x), int(y)
         )

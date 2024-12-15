@@ -1,4 +1,5 @@
 """Helper functions for parsing input."""
+import re
 from itertools import takewhile
 from typing import Iterator, TextIO
 
@@ -29,3 +30,10 @@ def read_sections(file: TextIO) -> list[list[str]]:
             break
         results.append(section)
     return results
+
+
+def regex_groups(regex: re.Pattern[str], line: str) -> tuple[str, ...]:
+    match = regex.match(line)
+    if match is None:
+        raise ValueError(f"Regex {regex} did not match line {line}")
+    return match.groups()
